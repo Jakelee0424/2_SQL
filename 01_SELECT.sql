@@ -74,7 +74,7 @@ SELECT SYSDATE -1 "하루 전", SYSDATE AS 현재시간, SYSDATE + 1 내일 FROM
 -- DB 리터럴 : 임의로 지정한 값을 기존 테이블에 존재하는 값처럼 사용하는 것
 -- DB 리터럴 표기법 -> '' (필수)
 
-SELECT EMP_NAME, SALARY, '원 입이다' FROM EMPLOYEE;
+SELECT EMP_NAME, SALARY, '원 입니다' FROM EMPLOYEE;
 
 ---------------------------------------------------------
 
@@ -204,3 +204,51 @@ WHERE DEPT_CODE IN('D1', 'D6', 'D9');
 SELECT EMP_ID, EMP_NAME, DEPT_CODE FROM EMPLOYEE
 WHERE DEPT_CODE NOT IN('D1', 'D6', 'D9')
 OR DEPT_CODE IS NULL;
+
+---------------------------------------------------------------------------
+
+/* NULL 처리 연산자
+* 
+* JAVA에서 NULL은 참조하는 객체가 없음을 의미
+* DB에서 NULL은 컬럼에 값이 없음을 의미
+* 
+* IS NULL : NULL인 경우 조회
+* IS NOT NULL : NULL이 아닌 경우 조회
+*/
+
+-- EMPLOYEE 에서 보너스가 있는 사원의 이름, 보너스 조회
+SELECT EMP_NAME, BONUS FROM EMPLOYEE WHERE BONUS IS NOT NULL;
+
+-- EMPLOYEE 에서 보너스가 없는 사원의 이름, 보너스 조회
+SELECT EMP_NAME, BONUS FROM EMPLOYEE WHERE BONUS IS NULL;
+
+------------------------------------------------------------------------------
+
+/* ORDER BY 
+ * 
+ * SELECT문의 조회 결과(RESULT SET)를 정렬할 때 사용하는 구문
+ * SELECT문 해석 시 가장 마지막에 해석된다.
+ * 컬럼명 | 별칭 | 컬럼순서 등으로
+ * 
+ * SELECT절 -> FROM 절 -> WHERE 절 -> ORDER BY 절 
+ */
+ 
+--EMPLOYEE 테이블 급여 오름차순
+SELECT EMP_ID, EMP_NAME, SALARY FROM EMPLOYEE ORDER BY SALARY DESC; 
+SELECT EMP_ID, EMP_NAME, SALARY FROM EMPLOYEE ORDER BY SALARY ASC;  --ASC가 기본값
+
+-- 급여 200만 이상의 사원의 사번, 이름 급여 조회 , 단 급여는 내림순
+SELECT EMP_ID, EMP_NAME, SALARY FROM EMPLOYEE WHERE SALARY >= 2000000 ORDER BY 3 DESC; -- 3 -> 3번째 컬럼
+
+-- 입사일 순서대로 이름 ,입사일 조회 (별칭 사용)
+SELECT EMP_NAME AS "이름", HIRE_DATE AS "입사일" FROM EMPLOYEE ORDER BY 입사일;
+
+-------------------------------------------------------------------------------------
+
+/* 정렬 중첩
+ * 
+ * 대분류 정렬 후 소분류 정렬
+ */
+
+-- 부서코드 오름차순 정렬 후 급여 내림차순 정렬
+SELECT EMP_NAME, DEPT_CODE, SALARY FROM EMPLOYEE ORDER BY DEPT_CODE , SALARY DESC;
