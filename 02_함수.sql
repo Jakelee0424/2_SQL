@@ -171,7 +171,7 @@ SELECT TO_CHAR(SYSDATE, 'YYYY/MM/DD HH24:MI:SS DAY')FROM DUAL;
 SELECT TO_CHAR(SYSDATE, 'MM/DD (DY)') FROM DUAL;
 
 --2024년 08월 04일 (금)
-SELECT TO_CHAR(SYSDATE, 'YYYY"년" MM"월" DD"일" (DY)') 날짜
+SELECT TO_CHAR(SYSDATE, 'YY" DD"일" (DY)') 날짜
 FROM DUAL; 
 -- 년 월 일 이 날짜를 나타내는 패턴으로 인식이 안되서 오류 발생
 --> "" 로 단순 문자로 인식시키면 해결
