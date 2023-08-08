@@ -31,7 +31,7 @@ SELECT INSTR('AABAACAABBAA', 'B', 5) FROM DUAL;
 SELECT INSTR('AABAACAABBAA', 'B', 5, 2) FROM DUAL; 
 
 -- EMPLOYEE 테이블에서 사원명, 이메일, 이메일 중 '@'의 위치 조회
-SELECT EMP_NAME, EMAIL,INSTR(EMAIL, '@') FROM EMPLOYEE;
+SELECT EMP_NAME, EMAIL, INSTR(EMAIL, '@') FROM EMPLOYEE;
 
 ------------------------------------------------------------
 
@@ -75,7 +75,7 @@ SELECT EMP_NAME, SALARY, MOD(SALARY, 1000000) FROM EMPLOYEE ;
 -- EMPLOYEE 에서 사번이 짝수 인 사원의 사번 이름
 SELECT EMP_ID, EMP_NAME FROM EMPLOYEE WHERE MOD(EMP_ID, 2) = 0; 
 
--- EMPLOYEE 에서 사번이 짝수 인 사원의 사번 이름
+-- EMPLOYEE 에서 사번이 홀수 인 사원의 사번 이름
 SELECT EMP_ID, EMP_NAME FROM EMPLOYEE WHERE MOD(EMP_ID, 2) = 1; 
 
 ---------------------------------------------------------------------------
