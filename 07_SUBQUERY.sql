@@ -361,7 +361,7 @@ SELECT EMP_NAME, JOB_NAME, DEPT_TITLE, HIRE_DATE
 FROM EMPLOYEE 
 LEFT JOIN JOB USING(JOB_CODE)
 LEFT JOIN DEPARTMENT ON (DEPT_CODE = DEPT_ID)
-WHERE (DEPT_CODE, JOB_CODE) IN (SELECT DEPT_CODE, JOB_CODE  
+WHERE (DEPT_CODE, JOB_CODE) = (SELECT DEPT_CODE, JOB_CODE  
 								FROM EMPLOYEE 
 								WHERE ENT_YN = 'Y'
 								AND SUBSTR(EMP_NO, 8, 1) = '2');
@@ -393,7 +393,7 @@ AND EMP_NAME != '노옹철';
 --    사번, 이름, 부서코드, 직급코드, 고용일
 SELECT DEPT_CODE, JOB_CODE
 FROM EMPLOYEE 
-WHERE TO_CHAR(HIRE_DATE, 'YYYY') = 2000; 
+WHERE TO_CHAR(HIRE_DATE, 'YYYY') = 2000; --EXTRACT(YEAR FROM HIRE_DATE)
 
 SELECT EMP_ID, EMP_NAME, DEPT_CODE, JOB_CODE, HIRE_DATE
 FROM EMPLOYEE
@@ -464,18 +464,14 @@ WHERE (JOB_CODE, TRUNC(SALARY,-4)) IN (SELECT JOB_CODE, TRUNC(AVG(SALARY),-4) --
 
 -- 직급별 급여 평균보다 급여를 많이 받는 직원의 
 -- 이름, 직급코드, 급여 조회
-
-
 									
 SELECT EMP_NAME, JOB_CODE, SALARY
-FROM EMPLOYEE MAIN
-WHERE SALARY > (SELECT AVG(SALARY)
+FROM EMPLOYEE MAIN 
+WHERE SALARY >(SELECT AVG(SALARY)
 				FROM EMPLOYEE SUB
-				WHERE SUB.JOB_CODE = MAIN.JOB_CODE);	 
+				WHERE SUB.JOB_CODE = MAIN.JOB_CODE )
 									
 									
-									
-
 
 SELECT EMP_NAME, JOB_CODE, SALARY
 FROM EMPLOYEE MAIN -- MAIN 쿼리
@@ -509,9 +505,40 @@ LEFT JOIN DEPARTMENT ON(DEPT_CODE = DEPT_ID)
 WHERE ENT_YN = 'N' -- MAIN 쿼리
 AND HIRE_DATE = (SELECT MIN(HIRE_DATE) /*2*/ -- SUB 쿼리
 				 FROM EMPLOYEE SUB
-				 WHERE SUB.DEPT_CODE = MAIN.DEPT_CODE)
+				 WHERE NVL(SUB.DEPT_CODE, 0) = NVL(MAIN.DEPT_CODE, 0))
 				 						  /*1*/
 ORDER BY HIRE_DATE;
+
+
+SELECT EMP_ID, EMP_NAME, DEPT_CODE, NVL(DEPT_TITLE, '소속없음'), JOB_NAME, HIRE_DATE
+FROM EMPLOYEE 
+JOIN JOB USING(JOB_CODE)
+LEFT JOIN DEPARTMENT ON(DEPT_CODE = DEPT_ID)
+WHERE ENT_YN = 'N' -- MAIN 쿼리
+AND HIRE_DATE IN (SELECT MIN(HIRE_DATE) /*2*/ -- SUB 쿼리
+				 FROM EMPLOYEE 
+				 GROUP BY DEPT_CODE)
+				 						  /*1*/
+ORDER BY HIRE_DATE;
+
+
+SELECT MIN(HIRE_DATE) /*2*/ -- SUB 쿼리
+				 FROM EMPLOYEE 
+				 GROUP BY DEPT_CODE;
+
+
+
+
+SELECT EMP_ID, EMP_NAME, NVL(DEPT_TITLE, '없음'), JOB_NAME, HIRE_DATE
+FROM EMPLOYEE MAIN
+LEFT JOIN DEPARTMENT ON(DEPT_CODE = DEPT_ID)
+LEFT JOIN JOB USING(JOB_CODE)
+WHERE ENT_YN = 'N'
+AND HIRE_DATE =(SELECT MIN(HIRE_DATE)
+				FROM EMPLOYEE SUB
+				WHERE SUB.DEPT_CODE = MAIN.DEPT_CODE )
+ORDER BY 5;
+
 
 -- 1) MAIN의 1행의 DEPT_CODE를 SUB에 대입
 -- 2) SUB를 수행
@@ -538,6 +565,13 @@ SELECT EMP_NAME, JOB_CODE, SALARY,
 	WHERE SUB.JOB_CODE = MAIN.JOB_CODE ) 직급별평균
 FROM EMPLOYEE MAIN;
 
+SELECT EMP_NAME
+FROM (SELECT EMP_NAME
+FROM EMPLOYEE 
+ORDER BY HIRE_DATE )
+WHERE ROWNUM = 1;
+
+
 -- 모든 사원의 사번, 이름, 관리자사번, 관리자명을 조회
 -- 단 관리자가 없는 경우 '없음'으로 표시
 -- (스칼라 + 상관 쿼리)
@@ -549,29 +583,63 @@ FROM EMPLOYEE MAIN;
 
 -----------------------------------------------------------------------
 
--- 7. 인라인 뷰(INLINE-VIEW)
+-- 7. 인라인 뷰(INLINE-VIEW) 'VIEW' - 필요한 것만 모은 가상 테이블
 --    FROM 절에서 서브쿼리를 사용하는 경우로
 --    서브쿼리가 만든 결과의 집합(RESULT SET)을 테이블 대신에 사용한다.
 
-
+SELECT *
+	FROM (
+		SELECT EMP_NAME 이름, DEPT_TITLE 부서
+		FROM EMPLOYEE 
+		JOIN DEPARTMENT ON(DEPT_CODE = DEPT_ID)
+		)
+WHERE 부서 = '기술지원부';
+	
 -- 인라인뷰를 활용한 TOP-N분석
 -- 전 직원 중 급여가 높은 상위 5명의
 -- 순위, 이름, 급여 조회
 
+SELECT ROWNUM, EMP_NAME, SALARY
+	FROM (SELECT EMP_NAME, SALARY
+			FROM EMPLOYEE 
+			ORDER BY SALARY DESC)
+WHERE ROWNUM <= 5;
+
+-- ROWNUM 컬럼 : 행 번호를 나타내는 가상 컬럼
+--				SELECT, WHERE, OREDER BY 절에서 사용 가능
+
+--> 인라인 뷰 이용
+-- 1) 이름, 급여를 급여 내림차순으로 조회한 결과를 인라인 뷰로 사용
+-- 		--> FROM절이기 때문에 해석 순위 1
+-- 2) 메인 쿼리 조회시 ROWNUM을 5이하까지만 조회
 
 
 -- 급여 평균이 3위 안에 드는 부서의 부서코드와 부서명, 평균급여를 조회
 
+SELECT DEPT_CODE, DEPT_TITLE, 평균급여
+FROM (SELECT DEPT_CODE, DEPT_TITLE, CEIL(AVG(SALARY)) 평균급여
+		FROM EMPLOYEE  
+		JOIN DEPARTMENT ON (DEPT_CODE = DEPT_ID)
+		GROUP BY DEPT_CODE, DEPT_TITLE
+		ORDER BY 평균급여 DESC)
+WHERE ROWNUM <= 3;
+
+
 ------------------------------------------------------------------------
 
 -- 8. WITH
---    서브쿼리에 이름을 붙여주고 사용시 이름을 사용하게 함
+--    서브쿼리에 이름을 붙여주고 사용시 이름을 사용하게 함 (별칭)
 --    인라인뷰로 사용될 서브쿼리에 주로 사용됨
 --    실행 속도도 빨라진다는 장점이 있다. 
 
--- 
 -- 전 직원의 급여 순위 
 -- 순위, 이름, 급여 조회
+WITH TOP_SAL AS (SELECT ROWNUM, EMP_NAME, SALARY
+					FROM EMPLOYEE 
+					ORDER BY SALARY DESC)
+SELECT ROWNUM, EMP_NAME, SALARY
+FROM TOP_SAL
+WHERE ROWNUM <= 10;
 
 
 --------------------------------------------------------------------------
@@ -584,11 +652,21 @@ FROM EMPLOYEE MAIN;
 
 -- 사원별 급여 순위
 -- 1) ROWNUM
+SELECT ROWNUM, EMP_NAME, SALARY
+FROM (SELECT EMP_NAME, SALARY
+		FROM EMPLOYEE 
+		ORDER BY SALARY DESC);
 
 -- 2) RANK() OVER(정렬순서)
+SELECT RANK() OVER(ORDER BY SALARY DESC) 순위, EMP_NAME, SALARY
+FROM EMPLOYEE ;
+
 
 -- DENSE_RANK() OVER : 동일한 순위 이후의 등수를 이후의 순위로 계산
 --                     EX) 공동 1위가 2명이어도 다음 순위는 2위
+SELECT DENSE_RANK() OVER(ORDER BY SALARY DESC) 순위, EMP_NAME, SALARY
+FROM EMPLOYEE ;
+
 
 
 
