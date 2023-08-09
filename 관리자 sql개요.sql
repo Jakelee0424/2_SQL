@@ -19,3 +19,6 @@ GRANT RESOURCE, CONNECT TO workbook;
 
 -- 객체가 생성될 수 있는 공간 할당량 지정
 ALTER USER workbook DEFAULT TABLESPACE SYSTEM QUOTA UNLIMITED ON SYSTEM;
+
+
+

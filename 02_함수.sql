@@ -170,7 +170,7 @@ SELECT TO_CHAR(SYSDATE, 'YYYY/MM/DD HH24:MI:SS DAY')FROM DUAL;
 SELECT TO_CHAR(SYSDATE, 'MM/DD (DY)') FROM DUAL;
 
 --2024년 08월 04일 (금)
-SELECT TO_CHAR(SYSDATE, 'YY" DD"일" (DY)') 날짜
+SELECT TO_CHAR(SYSDATE, 'YYYY"년" MM"월" DD"일" (DY)') 날짜
 FROM DUAL; 
 -- 년 월 일 이 날짜를 나타내는 패턴으로 인식이 안되서 오류 발생
 --> "" 로 단순 문자로 인식시키면 해결
@@ -186,7 +186,6 @@ SELECT TO_DATE('20231230')FROM DUAL;
 SELECT TO_DATE('230803 101835', 'YYMMDD HH24MISS')FROM DUAL;
 -- 패턴을 적용해서 작성된 문자열의 각 문자가 어떤 형식인지 인지 시킴[포맷]으로
 
-
 -- EMPLOYEE 테이블에서 각 직원이 태어난 생년월일 조회
 -- Y 패턴은 21세기 패턴 (20--년)
 -- R 패턴 :  1세기 기준으로 
@@ -199,7 +198,6 @@ SELECT EMP_NAME, TO_CHAR(TO_DATE(SUBSTR(EMP_NO, 1, 6),'RRMMDD' ), 'YYYY"년" MM"
 -- TO_NUMBER(문자 데이터, [포맷]) : 문자형 데이터를 숫자형으로 변경
 SELECT '1,000,000' + 500000 FROM DUAL; -- X
 SELECT  TO_NUMBER('1,000,000', '9,999,999') + 500000 FROM DUAL; 
-
 
 -- 4) NULL처리 함수
 -- NULL과 산술 진행 -> 결과는 NULL
