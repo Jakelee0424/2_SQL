@@ -8,16 +8,17 @@
 	 EX) 1부터 10까지 1씩 증가하고 반복하는 시퀀스 객체
 	 1 2 3 4 5 6 7 8 9 10 1 2 3 4 5 6 7 8 9 10
 	 
-	 ** SEQUENCE는 주로 PK역할의 컬럼에 삽입되는 값을 만드는 용도로 사용 **    
+******* SEQUENCE는 주로 PK역할의 컬럼에 삽입되는 값을 만드는 용도로 사용 **    
+	
 	--> 인위적 주식별자
 	
 	  [작성법]
 	  
   CREATE SEQUENCE 시퀀스이름
-  [STRAT WITH 숫자] -- 처음 발생시킬 시작값 지정, 생략하면 자동 1이 기본
+  [START WITH 숫자] -- 처음 발생시킬 시작값 지정, 생략하면 자동 1이 기본
   [INCREMENT BY 숫자] -- 다음 값에 대한 증가치, 생략하면 자동 1이 기본
   [MAXVALUE 숫자 | NOMAXVALUE] -- 발생시킬 최대값 지정 (10의 27승 -1)
-  [MINVALUE 숫자 | NOMINVALUE] -- 최소값 지정 (-10의 26승)
+  [MINVALUE 숫자 | NOMINVALUE] -- 최소값 지정 (-10의 26승)               ** START WITH != MINVALUE
   [CYCLE | NOCYCLE] -- 값 순환 여부 지정
   [CACHE 바이트크기 | NOCACHE] -- 캐쉬메모리 기본값은 20바이트, 최소값은 2바이트
 
@@ -37,19 +38,35 @@
 */
 
 
+CREATE SEQUENCE SEQ_TEST;
 
+SELECT SEQ_TEST.CURRVAL FROM DUAL;
+-- 오류 : 값이 없다고 생각함
+-- CURRVAL는 마지막 NEXTVAL 호출값을 다시 보여주는 기능  -->   NEXTVAL 수행 후 호출
 
+SELECT SEQ_TEST.NEXTVAL FROM DUAL;
 
+------------------------------------------------------------------------------------------
 
+-- 실제 사용 예시
 
+CREATE TABLE EMP_TEMP
+AS SELECT EMP_ID, EMP_NAME FROM EMPLOYEE;
 
+SELECT * FROM EMP_TEMP
+ORDER BY EMP_ID DESC;
 
+-- 223번부터 10씩 증가하는 시퀀스 생성
+CREATE SEQUENCE SEQ_TEMP
+START WITH 223 
+INCREMENT BY 10
+NOCYCLE  -- 반복 X(기본값)
+NOCACHE; -- 캐시 X (기본 20)
 
-
-
-
-
-
+-- EMP_TEMP에 사원정보 삽입
+INSERT INTO EMP_TEMP VALUES(SEQ_TEMP.NEXTVAL, '홍길동');
+INSERT INTO EMP_TEMP VALUES(SEQ_TEMP.NEXTVAL, '고길동');
+INSERT INTO EMP_TEMP VALUES(SEQ_TEMP.CURRVAL, '김길동');
 
 
 ---------------------------------------------------
@@ -64,9 +81,17 @@
   [CACHE 바이트크기 | NOCACHE] -- 캐쉬메모리 기본값은 20바이트, 최소값은 2바이트
 */
 
+-- SEQ_TEMP를 1씩 증가하는 형태로 변경
+ALTER SEQUENCE SEQ_TEMP
+INCREMENT BY 1;
+
+INSERT INTO EMP_TEMP VALUES(SEQ_TEMP.NEXTVAL, '홍개똥');
+INSERT INTO EMP_TEMP VALUES(SEQ_TEMP.NEXTVAL, '고개똥');
+INSERT INTO EMP_TEMP VALUES(SEQ_TEMP.NEXTVAL, '김개똥');
 
 
-
-
-
+-- 테이블(EMP_TEMP), 뷰 (V_EMP), 시퀀스(SEQ_TEMP) 삭제
+DROP TABLE EMP_TEMP;
+DROP VIEW V_EMP;
+DROP SEQUENCE SEQ_TEMP;
 

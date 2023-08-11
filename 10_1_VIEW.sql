@@ -21,12 +21,37 @@
     AS subquery
     [WITH CHECK OPTION]
     [WITH READ ONLY];
-    
-    -- 1) OR REPLACE 옵션 : 기존에 동일한 뷰 이름이 존재하는 경우 덮어쓰고, 
+  
+        
+    -- ** 1) OR REPLACE 옵션 : 기존에 동일한 뷰 이름이 존재하는 경우 덮어쓰고, 
     --                      존재하지 않으면 새로 생성.
     -- 2) FORCE / NOFORCE 옵션
     --      FORCE : 서브쿼리에 사용된 테이블이 존재하지 않아도 뷰 생성
     --      NOFORCE : 서브쿼리에 사용된 테이블이 존재해야만 뷰 생성(기본값)
     -- 3) WITH CHECK OPTION 옵션 : 옵션을 설정한 컬럼의 값을 수정 불가능하게 함.
-    -- 4) WITH READ ONLY 옵션 : 뷰에 대해 조회만 가능(DML 수행 불가)    
+    -- ** 4) WITH READ ONLY 옵션 : 뷰에 대해 조회만 가능(DML 수행 불가)    
 */
+
+
+-- 사번, 이름, 부서명, 직급명 조회 결과를 저장하는 뷰를 생성
+
+CREATE OR REPLACE VIEW V_EMP AS 
+	SELECT EMP_ID, EMP_NAME, DEPT_TITLE, JOB_NAME
+	FROM EMPLOYEE 
+	JOIN DEPARTMENT ON(DEPT_ID = DEPT_CODE)
+	JOIN JOB USING(JOB_CODE);
+-- 권한 필요 -> 'CREATE VIEW'
+
+GRANT CREATE VIEW TO kh;
+
+SELECT * FROM V_EMP;
+
+-- OR REPLACE 확인
+CREATE OR REPLACE VIEW V_EMP AS 
+	SELECT EMP_ID 사번, EMP_NAME 이름, DEPT_TITLE 부서명, JOB_NAME 직급명
+	FROM EMPLOYEE 
+	JOIN DEPARTMENT ON(DEPT_ID = DEPT_CODE)
+	JOIN JOB USING(JOB_CODE);
+
+
+

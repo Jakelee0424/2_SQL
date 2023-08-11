@@ -15,7 +15,7 @@
 -- [작성법]
 -- 	> 추가
 -- ALTER TABLE 테이블명 ADD [CONSTRAINT 제약조건명] 제약조건 (컬럼명);		<-기본 제약조건
--- ALTER TABLE 테이블명 ADD [CONSTRAINT 제약조건명] 제약조건 (컬럼명) [REFERENCES 참조테이블명[(참조컬럼명)] 	<- 외래키
+-- ALTER TABLE 테이블명 ADD [CONSTRAINT 제약조건명] 제약조건 (컬럼명) REFERENCES 참조테이블명(참조컬럼명) 	<- 외래키
 
 --	> 삭제
 --	ALTER TABLE 테이블명 DROP CONSTRAINT 제약조건명;
